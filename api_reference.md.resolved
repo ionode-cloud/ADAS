@@ -1,0 +1,219 @@
+# ADAS Dashboard — API Reference & Dummy Data Guide
+
+## Base URL
+```
+http://localhost:5000
+```
+
+---
+
+## 🔐 Authentication
+
+### Register a New User
+```http
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "secret123",
+  "role": "user"
+}
+```
+→ Sends OTP to email. Then verify below.
+
+### Verify OTP
+```http
+POST /api/auth/verify-otp
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "otp": "629709"
+}
+```
+
+### Login
+```http
+POST /api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@example.com",
+  "password": "secret123"
+}
+```
+→ Returns `{ token, user }`. Use `token` in `Authorization: Bearer <token>` header for all protected routes.
+
+---
+
+## 📡 Device Management
+
+> All device routes require `Authorization: Bearer <token>` header.
+
+### Add a Device
+```http
+POST /api/devices
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "deviceName": "Fleet Truck #01",
+  "deviceId": "DEVICE_001",
+  "particleId": "p1a2b3c4d5e6f001"
+}
+```
+
+### Get All Devices
+```http
+GET /api/devices
+Authorization: Bearer <token>
+```
+
+### Delete a Device
+```http
+DELETE /api/devices/:id
+Authorization: Bearer <token>
+```
+
+---
+
+## 📊 Telemetry Data (ESP32 → Server)
+
+> **No Authentication required** — ESP32 sends directly.
+
+### Send Sensor Data
+```http
+POST /api/device-data
+Content-Type: application/json
+
+{
+  "deviceId":    "DEVICE_001",
+  "ignition":    "ON",
+  "batteryTemp": 32.5,
+  "batterySOC":  78.3,
+  "batteryVoltage": 52.1,
+  "latitude":    18.5204,
+  "longitude":   73.8567
+}
+```
+✅ **Field Reference:**
+| Field | Type | Example | Description |
+|---|---|---|---|
+| `deviceId` | string | `"DEVICE_001"` | Must match a registered device |
+| `ignition` | string | `"ON"` / `"OFF"` | Engine ignition status |
+| `batteryTemp` | number | `32.5` | Battery temperature in °C |
+| `batterySOC` | number | `78.3` | State of Charge in % |
+| `batteryVoltage` | number | `52.1` | Voltage in V |
+| `latitude` | number | `18.5204` | GPS latitude |
+| `longitude` | number | `73.8567` | GPS longitude |
+
+### Get Device History
+```http
+GET /api/history/:deviceId
+Authorization: Bearer <token>
+```
+→ Returns last 100 records for the device.
+
+### Download Excel Log
+```http
+GET /api/download?deviceId=DEVICE_001&startDate=2026-03-01&endDate=2026-03-05
+Authorization: Bearer <token>
+```
+→ Returns `.xlsx` file download.
+
+---
+
+## 🗺️ Dashboards
+
+### Create Dashboard
+```http
+POST /api/dashboards
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "dashboardName": "Fleet Truck #01 Dashboard",
+  "deviceId": "DEVICE_001",
+  "description": "Main monitoring dashboard",
+  "enabledFeatures": [
+    "ignition",
+    "batterySOC",
+    "batteryTemperature",
+    "batteryVoltage",
+    "gps",
+    "dataLogging",
+    "dataDownload",
+    "deviceList",
+    "ota"
+  ]
+}
+```
+→ Returns dashboard with auto-generated `particleId`.
+
+### Get My Dashboards
+```http
+GET /api/dashboards
+Authorization: Bearer <token>
+```
+
+### Delete Dashboard
+```http
+DELETE /api/dashboards/:id
+Authorization: Bearer <token>
+```
+
+---
+
+## 🔧 OTA Firmware Update
+
+### Upload Firmware
+```http
+POST /api/ota/upload-firmware
+Authorization: Bearer <token>
+Content-Type: multipart/form-data
+
+firmware: <.bin file>
+```
+
+### ESP32 Check for Update
+```http
+GET /api/ota/check-update/:deviceId
+```
+→ Open endpoint for ESP32 to poll for new firmware.
+
+---
+
+## 🌱 Seed Dummy Data
+
+Run this once to populate 3 devices + 30 telemetry records each:
+
+```bash
+cd backend
+node seed.js
+```
+
+**Seeded Device IDs:**
+| Device Name | Device ID |
+|---|---|
+| Fleet Truck #01 | `DEVICE_001` |
+| Fleet Truck #02 | `DEVICE_002` |
+| Electric Van #01 | `DEVICE_003` |
+
+After seeding, create dashboards for each device ID via the UI or the API above.
+
+---
+
+## 🧪 Quick Test with curl
+
+```bash
+# 1. Login and get token
+curl -X POST http://localhost:5000/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@example.com","password":"secret123"}'
+
+# 2. Send dummy telemetry (no auth needed)
+curl -X POST http://localhost:5000/api/device-data \
+  -H "Content-Type: application/json" \
+  -d '{"deviceId":"DEVICE_001","ignition":"ON","batteryTemp":31.2,"batterySOC":74.5,"batteryVoltage":51.8,"latitude":18.5204,"longitude":73.8567}'
+```
