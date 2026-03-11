@@ -38,7 +38,7 @@ function App() {
       if (token) {
         try {
           // Fetch fresh user data (ensures role is up to date)
-          const res = await axios.get('http://localhost:5000/api/users/me', {
+          const res = await axios.get('https://adas-4cqb.onrender.com/api/users/me', {
             headers: { Authorization: `Bearer ${token}` }
           });
           // Update local storage user profile with fresh data

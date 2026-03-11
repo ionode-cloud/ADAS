@@ -36,7 +36,7 @@ const CreateDashboard = () => {
             try {
                 const token = localStorage.getItem('token');
                 if (!token) return;
-                const res = await axios.get('http://localhost:5000/api/devices', {
+                const res = await axios.get('https://adas-4cqb.onrender.com/api/devices', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setDevices(res.data);
@@ -76,7 +76,7 @@ const CreateDashboard = () => {
         try {
             const token = localStorage.getItem('token');
             const res = await axios.post(
-                'http://localhost:5000/api/dashboards',
+                'https://adas-4cqb.onrender.com/api/dashboards',
                 { dashboardName, deviceId, email, password, enabledFeatures, description },
                 {
                     headers: {

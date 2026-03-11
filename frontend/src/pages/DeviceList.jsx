@@ -29,7 +29,7 @@ const DeviceList = () => {
 
     const fetchDevices = async () => {
         try {
-            const res = await axios.get('http://localhost:5000/api/devices', { headers });
+            const res = await axios.get('https://adas-4cqb.onrender.com/api/devices', { headers });
             setDevices(res.data);
         } catch (err) {
             console.error('Error fetching devices', err);
@@ -46,7 +46,7 @@ const DeviceList = () => {
         setFormSuccess('');
         setFormLoading(true);
         try {
-            await axios.post('http://localhost:5000/api/devices',
+            await axios.post('https://adas-4cqb.onrender.com/api/devices',
                 { deviceName, deviceId, location },
                 { headers }
             );
@@ -66,7 +66,7 @@ const DeviceList = () => {
     const handleDelete = async (id, name) => {
         if (!window.confirm(`Remove device "${name}"?`)) return;
         try {
-            await axios.delete(`http://localhost:5000/api/devices/${id}`, { headers });
+            await axios.delete(`https://adas-4cqb.onrender.com/api/devices/${id}`, { headers });
             setDevices(prev => prev.filter(d => d._id !== id));
         } catch (err) {
             alert('Failed to delete device.');

@@ -21,7 +21,7 @@ const AdminPanel = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('http://localhost:5000/api/users', { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get('https://adas-4cqb.onrender.com/api/users', { headers: { Authorization: `Bearer ${token}` } });
             setUsers(res.data);
         } catch (error) { console.error('Error fetching users', error); }
     };
@@ -37,11 +37,11 @@ const AdminPanel = () => {
                 }
                 const payload = { email: newUser.email, role: newUser.role };
                 if (newUser.password) payload.password = newUser.password;
-                await axios.put(`http://localhost:5000/api/users/${editingUser._id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`https://adas-4cqb.onrender.com/api/users/${editingUser._id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
             } else {
                 if (!newUser.password) return alert('Password is required for new users.');
                 if (newUser.password.length < 6) return alert('Password must be at least 6 characters.');
-                await axios.post('http://localhost:5000/api/users', newUser, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post('https://adas-4cqb.onrender.com/api/users', newUser, { headers: { Authorization: `Bearer ${token}` } });
             }
             setNewUser({ email: '', password: '', role: 'user' });
             setEditingUser(null);
@@ -56,7 +56,7 @@ const AdminPanel = () => {
         if (!window.confirm('Delete this user?')) return;
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            await axios.delete(`https://adas-4cqb.onrender.com/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
             fetchUsers();
         } catch (error) { alert(error.response?.data?.message || 'Error deleting user'); }
     };

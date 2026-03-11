@@ -35,7 +35,7 @@ const Dashboard = () => {
 
         try {
             const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:5000/api/dashboards/${id}`, {
+            await axios.delete(`https://adas-4cqb.onrender.com/api/dashboards/${id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             const remaining = dashboards.filter(d => d._id !== id);
@@ -60,7 +60,7 @@ const Dashboard = () => {
                     setIsConnected(false);
                     return;
                 }
-                const res = await axios.get('http://localhost:5000/api/dashboards', {
+                const res = await axios.get('https://adas-4cqb.onrender.com/api/dashboards', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 
