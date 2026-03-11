@@ -3,7 +3,7 @@ const Device = require('../models/Device');
 // Add new device
 exports.addDevice = async (req, res) => {
     try {
-        const { deviceName, deviceId, particleId } = req.body;
+        const { deviceName, deviceId, location } = req.body;
 
         const existingDevice = await Device.findOne({ deviceId });
         if (existingDevice) {
@@ -13,7 +13,7 @@ exports.addDevice = async (req, res) => {
         const device = new Device({
             deviceName,
             deviceId,
-            particleId,
+            location,
         });
 
         await device.save();
@@ -34,7 +34,7 @@ exports.getDevices = async (req, res) => {
             const lastSeen = new Date(device.lastSeen);
             const diffMs = now - lastSeen;
             let status = diffMs > 5 * 60 * 1000 ? 'Offline' : 'Online';
-            
+
             // Force dummy/demo devices to be always Online
             if (device.deviceId === 'DEVICE_002' || device.deviceId === 'DEV-001') {
                 status = 'Online';

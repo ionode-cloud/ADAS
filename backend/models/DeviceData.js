@@ -25,6 +25,31 @@ const deviceDataSchema = new mongoose.Schema({
     gpsLongitude: {
         type: Number,
     },
+    flRadar: {
+        type: Number,
+    },
+    frRadar: {
+        type: Number,
+    },
+    rlRadar: {
+        type: Number,
+    },
+    rrRadar: {
+        type: Number,
+    },
+    brakeStatus: {
+        type: String,
+        enum: ['APPLIED', 'RELEASED'],
+        default: 'RELEASED',
+    },
+    lux: {
+        type: Number,
+    },
+    headlightStatus: {
+        type: String,
+        enum: ['ON', 'OFF'],
+        default: 'OFF',
+    },
     timestamp: {
         type: Date,
         default: Date.now,

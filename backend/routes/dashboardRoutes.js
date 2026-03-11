@@ -1,10 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const dashboardController = require('../controllers/dashboardController');
-const { protect } = require('../middleware/authMiddleware');
+const { protect, admin } = require('../middleware/authMiddleware');
 
-router.post('/', protect, dashboardController.createDashboard);
+// Protected standard user routes
 router.get('/', protect, dashboardController.getDashboards);
-router.delete('/:id', protect, dashboardController.deleteDashboard);
+
+// Protected AMIN ONLY routes
+router.post('/', protect, admin, dashboardController.createDashboard);
+router.delete('/:id', protect, admin, dashboardController.deleteDashboard);
 
 module.exports = router;

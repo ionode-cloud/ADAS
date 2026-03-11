@@ -1,5 +1,5 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Server, PlusSquare, Settings, Database, LogOut, Menu, X, Car, Activity } from 'lucide-react';
+import { LayoutDashboard, Server, PlusSquare, Settings, Database, LogOut, Menu, X, Car, Cpu } from 'lucide-react';
 import { useState } from 'react';
 
 const Layout = () => {
@@ -13,17 +13,25 @@ const Layout = () => {
         navigate('/login');
     };
 
-    const navLinks = [
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : {};
+    const userEmail = user.email || '';
+    const userInitial = userEmail.charAt(0).toUpperCase() || 'U';
+    const isAdmin = user.role === 'admin';
+
+    const allNavLinks = [
         { path: '/', icon: <LayoutDashboard size={18} />, label: 'Dashboard' },
         { path: '/devices', icon: <Server size={18} />, label: 'Devices' },
         { path: '/create-dashboard', icon: <PlusSquare size={18} />, label: 'Create Dashboard' },
-        { path: '/sensors', icon: <Activity size={18} />, label: 'Proximity Radar' },
+        { path: '/infrastructure', icon: <Cpu size={18} />, label: 'OTA' },
+
         { path: '/logs', icon: <Database size={18} />, label: 'Data Logs' },
         { path: '/admin', icon: <Settings size={18} />, label: 'Admin Panel' },
     ];
 
-    const userEmail = JSON.parse(localStorage.getItem('user') || '{}')?.email || '';
-    const userInitial = userEmail.charAt(0).toUpperCase() || 'U';
+    const navLinks = isAdmin
+        ? allNavLinks
+        : allNavLinks.filter(link => link.path === '/' || link.path === '/devices');
 
     return (
         <div className="flex h-screen overflow-hidden" style={{ background: '#F5F7FA' }}>
@@ -63,11 +71,10 @@ const Layout = () => {
                                 key={link.path}
                                 to={link.path}
                                 onClick={() => setSidebarOpen(false)}
-                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
-                                    isActive
-                                        ? 'text-white'
-                                        : 'text-white/60 hover:text-white hover:bg-white/8'
-                                }`}
+                                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${isActive
+                                    ? 'text-white'
+                                    : 'text-white/60 hover:text-white hover:bg-white/8'
+                                    }`}
                                 style={isActive ? { background: 'rgba(245,158,11,0.2)', borderLeft: '3px solid #F59E0B', paddingLeft: '9px' } : {}}
                             >
                                 <span className={isActive ? 'text-amber-400' : ''}>{link.icon}</span>

@@ -10,13 +10,21 @@ const deviceSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    particleId: {
+    location: {
         type: String,
         required: true,
     },
     lastSeen: {
         type: Date,
         default: Date.now,
+    },
+    otaUpdatePending: {
+        type: Boolean,
+        default: false,
+    },
+    otaFirmwareUrl: {
+        type: String,
+        default: "",
     }
 }, { timestamps: true });
 

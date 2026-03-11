@@ -3,31 +3,26 @@ const router = express.Router();
 const multer = require('multer');
 const path = require('path');
 const otaController = require('../controllers/otaController');
-const { protect, admin } = require('../middleware/authMiddleware');
 
-// Storage config
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        // Append timestamp to ensure uniqueness
-        cb(null, `firmware-${Date.now()}${path.extname(file.originalname)}`);
-    }
-});
+// Ensure uploads folder exists
+const uploadsDir = path.join(__dirname, '..', 'uploads');
 
-const upload = multer({
-    storage,
-    fileFilter: (req, file, cb) => {
-        const ext = path.extname(file.originalname);
-        if (ext !== '.bin') {
-            return cb(new Error('Only .bin files are allowed'));
-        }
-        cb(null, true);
-    }
-});
+// Setup multer mapping
+const upload = multer({ dest: uploadsDir });
 
-router.post('/upload-firmware', protect, upload.single('firmware'), otaController.uploadFirmware);
-router.get('/check-update/:deviceId', otaController.checkUpdate); // Open for ESP32
+// 1. Devices Ping (ESP32) -> /api/ota/device-ping
+router.get('/device-ping', otaController.pingDevice);
+
+// 2. Web Checks Online Status -> /api/ota/check-device
+router.get('/check-device', otaController.checkDeviceStatus);
+
+// 3. Web Uploads .bin -> /api/ota/upload/:deviceId
+router.post('/upload/:deviceId', upload.single('firmware'), otaController.uploadFirmware);
+
+// 4. Web Links GitHub .bin -> /api/ota/update-link/:deviceId
+router.post('/update-link/:deviceId', otaController.updateViaLink);
+
+// 5. ESP32 Requests Firmware Location -> /api/ota/trigger-update
+router.get('/trigger-update', otaController.triggerUpdate);
 
 module.exports = router;

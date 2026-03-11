@@ -5,7 +5,11 @@ const ExcelJS = require('exceljs');
 // ESP32 sends data here
 exports.receiveData = async (req, res) => {
     try {
-        const { deviceId, ignition, batteryTemp, batterySOC, batteryVoltage, latitude, longitude } = req.body;
+        const { 
+            deviceId, ignition, batteryTemp, batterySOC, batteryVoltage, 
+            latitude, longitude, flRadar, frRadar, rlRadar, rrRadar, 
+            brakeStatus, lux, headlightStatus 
+        } = req.body;
 
         // Validate device connection
         const device = await Device.findOne({ deviceId });
@@ -25,6 +29,13 @@ exports.receiveData = async (req, res) => {
             batteryVoltage,
             gpsLatitude: latitude,
             gpsLongitude: longitude,
+            flRadar,
+            frRadar,
+            rlRadar,
+            rrRadar,
+            brakeStatus,
+            lux,
+            headlightStatus
         });
 
         await newData.save();
@@ -72,6 +83,13 @@ exports.downloadExcel = async (req, res) => {
             { header: 'Battery Voltage', key: 'batteryVoltage', width: 15 },
             { header: 'Latitude', key: 'gpsLatitude', width: 15 },
             { header: 'Longitude', key: 'gpsLongitude', width: 15 },
+            { header: 'FLRadar', key: 'flRadar', width: 15 },
+            { header: 'FRRadar', key: 'frRadar', width: 15 },
+            { header: 'RLRadar', key: 'rlRadar', width: 15 },
+            { header: 'RRRadar', key: 'rrRadar', width: 15 },
+            { header: 'Brake Sts', key: 'brakeStatus', width: 15 },
+            { header: 'LUX', key: 'lux', width: 15 },
+            { header: 'headLight sts', key: 'headlightStatus', width: 15 },
             { header: 'Timestamp', key: 'timestamp', width: 25 },
         ];
 
@@ -84,6 +102,13 @@ exports.downloadExcel = async (req, res) => {
                 batteryVoltage: item.batteryVoltage,
                 gpsLatitude: item.gpsLatitude,
                 gpsLongitude: item.gpsLongitude,
+                flRadar: item.flRadar,
+                frRadar: item.frRadar,
+                rlRadar: item.rlRadar,
+                rrRadar: item.rrRadar,
+                brakeStatus: item.brakeStatus,
+                lux: item.lux,
+                headlightStatus: item.headlightStatus,
                 timestamp: item.timestamp,
             });
         });

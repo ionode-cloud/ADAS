@@ -3,7 +3,7 @@ import axios from 'axios';
 import {
     Server, Activity, Clock, Search, PlusCircle,
     Trash2, Wifi, WifiOff, CheckCircle2, AlertCircle,
-    MonitorSmartphone, Cpu, Hash, X
+    MonitorSmartphone, Cpu, Hash, X, MapPin
 } from 'lucide-react';
 
 const DeviceList = () => {
@@ -15,13 +15,17 @@ const DeviceList = () => {
     // Form state
     const [deviceName, setDeviceName] = useState('');
     const [deviceId, setDeviceId] = useState('');
-    const [particleId, setParticleId] = useState('');
+    const [location, setLocation] = useState('');
     const [formLoading, setFormLoading] = useState(false);
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
 
     const token = localStorage.getItem('token');
     const headers = { Authorization: `Bearer ${token}` };
+
+    const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : {};
+    const isAdmin = user.role === 'admin';
 
     const fetchDevices = async () => {
         try {
@@ -43,13 +47,13 @@ const DeviceList = () => {
         setFormLoading(true);
         try {
             await axios.post('http://localhost:5000/api/devices',
-                { deviceName, deviceId, particleId },
+                { deviceName, deviceId, location },
                 { headers }
             );
             setFormSuccess(`Device "${deviceName}" added successfully!`);
             setDeviceName('');
             setDeviceId('');
-            setParticleId('');
+            setLocation('');
             fetchDevices();
             setTimeout(() => { setFormSuccess(''); setShowForm(false); }, 2000);
         } catch (err) {
@@ -72,7 +76,7 @@ const DeviceList = () => {
     const filtered = devices.filter(d =>
         d.deviceName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         d.deviceId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (d.particleId || '').toLowerCase().includes(searchTerm.toLowerCase())
+        (d.location || '').toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
@@ -101,13 +105,15 @@ const DeviceList = () => {
                             onChange={e => setSearchTerm(e.target.value)}
                         />
                     </div>
-                    <button
-                        onClick={() => { setShowForm(f => !f); setFormError(''); setFormSuccess(''); }}
-                        className="device-add-btn"
-                    >
-                        {showForm ? <X size={18} /> : <PlusCircle size={18} />}
-                        {showForm ? 'Cancel' : 'Add Device'}
-                    </button>
+                    {isAdmin && (
+                        <button
+                            onClick={() => { setShowForm(f => !f); setFormError(''); setFormSuccess(''); }}
+                            className="device-add-btn"
+                        >
+                            {showForm ? <X size={18} /> : <PlusCircle size={18} />}
+                            {showForm ? 'Cancel' : 'Add Device'}
+                        </button>
+                    )}
                 </div>
             </div>
 
@@ -149,17 +155,18 @@ const DeviceList = () => {
                                 placeholder="e.g., DEVICE_001"
                                 value={deviceId}
                                 onChange={e => setDeviceId(e.target.value)}
+                                maxLength={10}
                                 required
                             />
                         </div>
                         <div className="device-field">
-                            <label className="device-label">Particle ID</label>
+                            <label className="device-label">Location</label>
                             <input
                                 type="text"
                                 className="device-input font-mono"
-                                placeholder="e.g., 3af82bc9..."
-                                value={particleId}
-                                onChange={e => setParticleId(e.target.value)}
+                                placeholder="e.g., New York, NY"
+                                value={location}
+                                onChange={e => setLocation(e.target.value)}
                                 required
                             />
                         </div>
@@ -178,7 +185,7 @@ const DeviceList = () => {
                 <div className="device-table-header">
                     <div className="device-col-1">Device</div>
                     <div className="device-col-2">Device ID</div>
-                    <div className="device-col-3">Particle ID</div>
+                    <div className="device-col-3">Location</div>
                     <div className="device-col-4">Status</div>
                     <div className="device-col-5">Last Seen</div>
                     <div className="device-col-6"></div>
@@ -210,10 +217,10 @@ const DeviceList = () => {
                                         </span>
                                     </div>
 
-                                    {/* Particle ID */}
+                                    {/* Location */}
                                     <div className="device-col-3">
                                         <span className="device-mono-badge">
-                                            <Activity size={11} />{device.particleId}
+                                            <MapPin size={11} />{device.location}
                                         </span>
                                     </div>
 
@@ -235,13 +242,15 @@ const DeviceList = () => {
 
                                     {/* Actions */}
                                     <div className="device-col-6">
-                                        <button
-                                            onClick={() => handleDelete(device._id, device.deviceName)}
-                                            className="device-delete-btn"
-                                            title="Remove device"
-                                        >
-                                            <Trash2 size={15} />
-                                        </button>
+                                        {isAdmin && (
+                                            <button
+                                                onClick={() => handleDelete(device._id, device.deviceName)}
+                                                className="device-delete-btn"
+                                                title="Remove device"
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             );

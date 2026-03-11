@@ -7,7 +7,7 @@ const dashboardSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     enabledFeatures: {
         type: [String],
-        default: ['ignition', 'batterySOC', 'batteryTemperature', 'batteryVoltage', 'gps', 'dataLogging', 'dataDownload', 'deviceList', 'ota'],
+        default: ['ignition', 'batterySOC', 'batteryTemperature', 'batteryVoltage', 'speed', 'engineRPM', 'gps'],
     },
     description: { type: String, default: '' },
 }, { timestamps: true });

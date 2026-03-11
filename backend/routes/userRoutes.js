@@ -3,7 +3,11 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
+// Get current user profile
+router.get('/me', protect, userController.getMe);
+
 // Get all users
+
 router.get('/', protect, admin, userController.getUsers);
 
 // Create user (Admin auto-verified)

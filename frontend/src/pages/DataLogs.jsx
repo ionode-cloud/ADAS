@@ -127,7 +127,7 @@ const DataLogs = () => {
                         </div>
                     ) : (
                         <table className="saas-table">
-                            <thead>
+                            <thead className="sticky top-0 bg-slate-50 z-10 shadow-sm">
                                 <tr>
                                     <th>Timestamp</th>
                                     <th>Ignition</th>
@@ -135,6 +135,13 @@ const DataLogs = () => {
                                     <th>Battery Temp</th>
                                     <th>Voltage</th>
                                     <th>GPS Location</th>
+                                    <th>FLRadar</th>
+                                    <th>FRRadar</th>
+                                    <th>RLRadar</th>
+                                    <th>RRRadar</th>
+                                    <th>Brake Sts</th>
+                                    <th>LUX</th>
+                                    <th>headLight sts</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -157,11 +164,26 @@ const DataLogs = () => {
                                         <td className="text-slate-700">{data.batteryTemperature}°C</td>
                                         <td className="text-slate-700">{data.batteryVoltage}V</td>
                                         <td className="text-slate-400 text-xs font-mono">{data.gpsLatitude}, {data.gpsLongitude}</td>
+                                        <td className="text-slate-700">{data.flRadar}</td>
+                                        <td className="text-slate-700">{data.frRadar}</td>
+                                        <td className="text-slate-700">{data.rlRadar}</td>
+                                        <td className="text-slate-700">{data.rrRadar}</td>
+                                        <td>
+                                            <span className={data.brakeStatus === 'APPLIED' ? 'badge-danger' : 'badge-success'}>
+                                                {data.brakeStatus}
+                                            </span>
+                                        </td>
+                                        <td className="text-slate-700">{data.lux}</td>
+                                        <td>
+                                            <span className={data.headlightStatus === 'ON' ? 'badge-success' : 'badge-danger'}>
+                                                {data.headlightStatus}
+                                            </span>
+                                        </td>
                                     </tr>
                                 ))}
                                 {deviceData.length === 0 && (
                                     <tr>
-                                        <td colSpan="6" className="py-16 text-center text-slate-400 font-medium">No telemetry data found for this device.</td>
+                                        <td colSpan="13" className="py-16 text-center text-slate-400 font-medium">No telemetry data found for this device.</td>
                                     </tr>
                                 )}
                             </tbody>

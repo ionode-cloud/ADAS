@@ -10,9 +10,9 @@ const DeviceData = require('./models/DeviceData');
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/adas-dashboard';
 
 const DUMMY_DEVICES = [
-    { deviceName: 'Fleet Truck #01', deviceId: 'DEVICE_001', particleId: 'p1a2b3c4d5e6f001', lastSeen: new Date() },
-    { deviceName: 'Fleet Truck #02', deviceId: 'DEVICE_002', particleId: 'p1a2b3c4d5e6f002', lastSeen: new Date() },
-    { deviceName: 'Electric Van #01', deviceId: 'DEVICE_003', particleId: 'p1a2b3c4d5e6f003', lastSeen: new Date(Date.now() - 10 * 60 * 1000) },
+    { deviceName: 'Fleet Truck #01', deviceId: 'DEVICE_001', particleId: 'p1a2b3c4d5e6f001', location: 'New York', lastSeen: new Date() },
+    { deviceName: 'Fleet Truck #02', deviceId: 'DEVICE_002', particleId: 'p1a2b3c4d5e6f002', location: 'London', lastSeen: new Date() },
+    { deviceName: 'Electric Van #01', deviceId: 'DEVICE_003', particleId: 'p1a2b3c4d5e6f003', location: 'Tokyo', lastSeen: new Date(Date.now() - 10 * 60 * 1000) },
 ];
 
 // Generate realistic telemetry rows for each device
@@ -34,6 +34,13 @@ function generateTelemetryRows(deviceId, count = 30) {
             batteryTemperature: parseFloat(temp.toFixed(1)),
             gpsLatitude: 18.5204 + (Math.random() - 0.5) * 0.05,
             gpsLongitude: 73.8567 + (Math.random() - 0.5) * 0.05,
+            flRadar: Math.floor(Math.random() * 200),
+            frRadar: Math.floor(Math.random() * 200),
+            rlRadar: Math.floor(Math.random() * 200),
+            rrRadar: Math.floor(Math.random() * 200),
+            brakeStatus: Math.random() > 0.5 ? 'APPLIED' : 'RELEASED',
+            lux: Math.floor(Math.random() * 1000),
+            headlightStatus: Math.random() > 0.5 ? 'ON' : 'OFF',
             timestamp: new Date(now - i * 5 * 60 * 1000), // every 5 min
         });
     }

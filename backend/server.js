@@ -4,13 +4,13 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const http = require('http');
 const { Server } = require('socket.io');
+const path = require('path'); // Added path module
 const authRoutes = require('./routes/authRoutes');
 const deviceRoutes = require('./routes/deviceRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const dataRoutes = require('./routes/dataRoutes');
 const otaRoutes = require('./routes/otaRoutes');
 const userRoutes = require('./routes/userRoutes');
-
 
 
 const app = express();
@@ -22,16 +22,11 @@ const io = new Server(server, {
 });
 
 // Middleware
-app.use(cors({
-    origin: function (origin, callback) {
-        // Allow all origins (including no-origin requests like curl/Postman)
-        callback(null, true);
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-}));
+app.use(cors()); // Simplified cors configuration
 app.use(express.json());
+
+// Serve OTA firmware uploads statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Make io accessible to routers
 app.use((req, res, next) => {

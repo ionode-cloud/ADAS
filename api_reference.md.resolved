@@ -94,7 +94,14 @@ Content-Type: application/json
   "batterySOC":  78.3,
   "batteryVoltage": 52.1,
   "latitude":    18.5204,
-  "longitude":   73.8567
+  "longitude":   73.8567,
+  "flRadar":     120,
+  "frRadar":     145,
+  "rlRadar":     80,
+  "rrRadar":     95,
+  "brakeStatus": "APPLIED",
+  "lux":         450,
+  "headlightStatus": "ON"
 }
 ```
 ✅ **Field Reference:**
@@ -107,6 +114,13 @@ Content-Type: application/json
 | `batteryVoltage` | number | `52.1` | Voltage in V |
 | `latitude` | number | `18.5204` | GPS latitude |
 | `longitude` | number | `73.8567` | GPS longitude |
+| `flRadar` | number | `120` | Front Left Radar proximity |
+| `frRadar` | number | `145` | Front Right Radar proximity |
+| `rlRadar` | number | `80` | Rear Left Radar proximity |
+| `rrRadar` | number | `95` | Rear Right Radar proximity |
+| `brakeStatus` | string | `"APPLIED"` / `"RELEASED"` | Brake pedal status |
+| `lux` | number | `450` | Ambient light sensor value |
+| `headlightStatus` | string | `"ON"` / `"OFF"` | Headlight operating status |
 
 ### Get Device History
 ```http
@@ -138,14 +152,12 @@ Content-Type: application/json
   "description": "Main monitoring dashboard",
   "enabledFeatures": [
     "ignition",
-    "batterySOC",
     "batteryTemperature",
+    "batterySOC",
     "batteryVoltage",
-    "gps",
-    "dataLogging",
-    "dataDownload",
-    "deviceList",
-    "ota"
+    "speed",
+    "engineRPM",
+    "gps"
   ]
 }
 ```
@@ -167,20 +179,46 @@ Authorization: Bearer <token>
 
 ## 🔧 OTA Firmware Update
 
-### Upload Firmware
+### 1. Device Ping (ESP32 → Server)
 ```http
-POST /api/ota/upload-firmware
+GET /api/ota/device-ping?device=DEVICE_001
+```
+→ ESP32 pings this endpoint to state that it is online.
+
+### 2. Check Device Status (Web Admin)
+```http
+GET /api/ota/check-device?device=DEVICE_001
+Authorization: Bearer <token>
+```
+→ Returns `{ "online": true/false }` if the device pinged within the last 10 seconds.
+
+### 3. Upload Firmware .bin (Web Admin)
+```http
+POST /api/ota/upload/:deviceId
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
 
 firmware: <.bin file>
 ```
+→ Uploads `.bin` file and marks an OTA update as pending.
 
-### ESP32 Check for Update
+### 4. Update via GitHub Link (Web Admin)
 ```http
-GET /api/ota/check-update/:deviceId
+POST /api/ota/update-link/:deviceId
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "url": "https://raw.githubusercontent.com/.../firmware.bin"
+}
 ```
-→ Open endpoint for ESP32 to poll for new firmware.
+→ Downloads the `.bin` from the link to the server and marks an OTA update as pending.
+
+### 5. Trigger Update (ESP32 Polls)
+```http
+GET /api/ota/trigger-update?device=DEVICE_001
+```
+→ Returns `{ "update": true, "url": "..." }` containing the firmware URL if an update is pending.
 
 ---
 
@@ -215,5 +253,5 @@ curl -X POST http://localhost:5000/api/auth/login \
 # 2. Send dummy telemetry (no auth needed)
 curl -X POST http://localhost:5000/api/device-data \
   -H "Content-Type: application/json" \
-  -d '{"deviceId":"DEVICE_001","ignition":"ON","batteryTemp":31.2,"batterySOC":74.5,"batteryVoltage":51.8,"latitude":18.5204,"longitude":73.8567}'
+  -d '{"deviceId":"DEVICE_001","ignition":"ON","batteryTemp":31.2,"batterySOC":74.5,"batteryVoltage":51.8,"latitude":18.5204,"longitude":73.8567,"flRadar":120,"frRadar":145,"rlRadar":80,"rrRadar":95,"brakeStatus":"APPLIED","lux":450,"headlightStatus":"ON"}'
 ```
