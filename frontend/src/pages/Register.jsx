@@ -31,7 +31,7 @@ const Register = () => {
         setError('');
         setLoading(true);
         try {
-            await axios.post('https://adas-4cqb.onrender.com/api/auth/register', { email, password, role: 'user' });
+            await axios.post('https://adas-fcgb.onrender.com/api/auth/register', { email, password, role: 'user' });
             setStep(STEPS.OTP);
             setCountdown(60);
         } catch (err) {
@@ -46,7 +46,7 @@ const Register = () => {
         setError('');
         setLoading(true);
         try {
-            await axios.post('https://adas-4cqb.onrender.com/api/auth/send-otp', { email });
+            await axios.post('https://adas-fcgb.onrender.com/api/auth/send-otp', { email });
             setCountdown(60);
             setSuccess('OTP resent successfully!');
             setTimeout(() => setSuccess(''), 3000);
@@ -88,7 +88,7 @@ const Register = () => {
         setError('');
         setLoading(true);
         try {
-            await axios.post('https://adas-4cqb.onrender.com/api/auth/verify-otp', { email, otp: code });
+            await axios.post('https://adas-fcgb.onrender.com/api/auth/verify-otp', { email, otp: code });
             setStep(STEPS.DONE);
         } catch (err) {
             setError(err.response?.data?.message || 'Invalid OTP. Please try again.');

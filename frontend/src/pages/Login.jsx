@@ -17,7 +17,7 @@ const Login = ({ setAuth }) => {
         setError('');
 
         try {
-            const res = await axios.post('https://adas-4cqb.onrender.com/api/auth/login', { email, password });
+            const res = await axios.post('https://adas-fcgb.onrender.com/api/auth/login', { email, password });
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('user', JSON.stringify(res.data.user));
             setAuth(true);

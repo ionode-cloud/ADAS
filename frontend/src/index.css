@@ -795,9 +795,7 @@
   padding: 8px;
   transition: color 0.2s;
   width: 100%;
-}
 
-.resend-btn:not(:disabled):hover {
   color: #F59E0B;
 }
 

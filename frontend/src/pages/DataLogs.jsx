@@ -14,7 +14,7 @@ const DataLogs = () => {
         const fetchDashboards = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get('https://adas-4cqb.onrender.com/api/dashboards', {
+                const res = await axios.get('https://adas-fcgb.onrender.com/api/dashboards', {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setDashboards(res.data);
@@ -32,7 +32,7 @@ const DataLogs = () => {
             setLoading(true);
             try {
                 const token = localStorage.getItem('token');
-                const res = await axios.get(`https://adas-4cqb.onrender.com/api/history/${selectedDeviceId}`, {
+                const res = await axios.get(`https://adas-fcgb.onrender.com/api/history/${selectedDeviceId}`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 setDeviceData(res.data);
@@ -49,7 +49,7 @@ const DataLogs = () => {
         if (!selectedDeviceId) return;
         try {
             const token = localStorage.getItem('token');
-            const url = `https://adas-4cqb.onrender.com/api/download?deviceId=${selectedDeviceId}&startDate=${startDate}&endDate=${endDate}`;
+            const url = `https://adas-fcgb.onrender.com/api/download?deviceId=${selectedDeviceId}&startDate=${startDate}&endDate=${endDate}`;
             const response = await axios.get(url, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(new Blob([response.data]));

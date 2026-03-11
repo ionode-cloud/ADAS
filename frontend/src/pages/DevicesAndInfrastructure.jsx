@@ -20,7 +20,7 @@ const DevicesAndInfrastructure = () => {
     const fetchDevices = async () => {
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get('https://adas-4cqb.onrender.com/api/devices', { headers: { Authorization: `Bearer ${token}` } });
+            const res = await axios.get('https://adas-fcgb.onrender.com/api/devices', { headers: { Authorization: `Bearer ${token}` } });
             setDevices(res.data);
         } catch (error) { console.error('Error fetching devices', error); }
     };
@@ -31,7 +31,7 @@ const DevicesAndInfrastructure = () => {
         setUploadStatus('Checking device status...');
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.get(`https://adas-4cqb.onrender.com/api/ota/check-device?device=${selectedDevice}`, {
+            const res = await axios.get(`https://adas-fcgb.onrender.com/api/ota/check-device?device=${selectedDevice}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setDeviceStatus(res.data.online);
@@ -51,7 +51,7 @@ const DevicesAndInfrastructure = () => {
         setUploadStatus('Updating firmware from link...');
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`https://adas-4cqb.onrender.com/api/ota/update-link/${selectedDevice}`, { url: gitLink }, {
+            const res = await axios.post(`https://adas-fcgb.onrender.com/api/ota/update-link/${selectedDevice}`, { url: gitLink }, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setUploadStatus(`✓ ${res.data}`);
@@ -75,7 +75,7 @@ const DevicesAndInfrastructure = () => {
 
         try {
             const token = localStorage.getItem('token');
-            const res = await axios.post(`https://adas-4cqb.onrender.com/api/ota/upload/${selectedDevice}`, formData, {
+            const res = await axios.post(`https://adas-fcgb.onrender.com/api/ota/upload/${selectedDevice}`, formData, {
                 headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
             });
             setUploadStatus(`✓ ${res.data}`);
