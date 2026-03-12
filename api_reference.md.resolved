@@ -1,9 +1,8 @@
 # ADAS Dashboard — API Reference & Guide
 
 ## Base URL
-```
-http://localhost:5000
-```
+- Local: `http://localhost:5000`
+- Production: `https://adas-fcgb.onrender.com`
 
 ---
 
@@ -84,7 +83,7 @@ http://localhost:5000
 All APIs are now **Public**. No authentication token is required in the headers.
 
 1.  **Method**: Set the request type (GET, POST, etc.).
-2.  **URL**: Use `http://localhost:5000` followed by the endpoint.
+2.  **URL**: Use `http://localhost:5000` or `https://adas-fcgb.onrender.com` followed by the endpoint.
 3.  **Body**: For POST/PUT requests, set Body to `raw` and format to `JSON`.
 4.  **Query Params**: For telemetry GET requests, use `?deviceId=DEVICE_001`.
 
