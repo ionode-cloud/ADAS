@@ -80,7 +80,9 @@ exports.createDashboard = async (req, res) => {
 
 exports.getDashboards = async (req, res) => {
     try {
-        const query = req.user.role === 'admin' ? {} : { user: req.user._id };
+        // If authentication is removed, req.user might be undefined.
+        // Return all dashboards if no user filter is applicable.
+        const query = (req.user && req.user.role !== 'admin') ? { user: req.user._id } : {};
         const dashboards = await Dashboard.find(query).populate('user', 'email');
         res.status(200).json(dashboards);
     } catch (error) {

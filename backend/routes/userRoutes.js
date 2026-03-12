@@ -4,19 +4,18 @@ const userController = require('../controllers/userController');
 const { protect, admin } = require('../middleware/authMiddleware');
 
 // Get current user profile
-router.get('/me', protect, userController.getMe);
+router.get('/me', userController.getMe);
 
 // Get all users
+router.get('/', userController.getUsers);
 
-router.get('/', protect, admin, userController.getUsers);
-
-// Create user (Admin auto-verified)
-router.post('/', protect, admin, userController.createUser);
+// Create user
+router.post('/', userController.createUser);
 
 // Update user
-router.put('/:id', protect, admin, userController.updateUser);
+router.put('/:id', userController.updateUser);
 
 // Delete user
-router.delete('/:id', protect, admin, userController.deleteUser);
+router.delete('/:id', userController.deleteUser);
 
 module.exports = router;

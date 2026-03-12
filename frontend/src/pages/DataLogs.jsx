@@ -13,10 +13,8 @@ const DataLogs = () => {
     useEffect(() => {
         const fetchDashboards = async () => {
             try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get('https://adas-fcgb.onrender.com/api/dashboards', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await axios.get(`${apiUrl}/api/dashboards`);
                 setDashboards(res.data);
                 if (res.data.length > 0) setSelectedDeviceId(res.data[0].deviceId);
             } catch (error) {
@@ -31,10 +29,8 @@ const DataLogs = () => {
         const fetchHistory = async () => {
             setLoading(true);
             try {
-                const token = localStorage.getItem('token');
-                const res = await axios.get(`https://adas-fcgb.onrender.com/api/history/${selectedDeviceId}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await axios.get(`${apiUrl}/api/vehicle/history?deviceId=${selectedDeviceId}&limit=100`);
                 setDeviceData(res.data);
             } catch (error) {
                 console.error('Error fetching history', error);
@@ -46,11 +42,10 @@ const DataLogs = () => {
     }, [selectedDeviceId]);
 
     const handleDownload = async () => {
-        if (!selectedDeviceId) return;
         try {
-            const token = localStorage.getItem('token');
-            const url = `https://adas-fcgb.onrender.com/api/download?deviceId=${selectedDeviceId}&startDate=${startDate}&endDate=${endDate}`;
-            const response = await axios.get(url, { headers: { Authorization: `Bearer ${token}` }, responseType: 'blob' });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const url = `${apiUrl}/api/download?deviceId=${selectedDeviceId}&startDate=${startDate}&endDate=${endDate}`;
+            const response = await axios.get(url, { responseType: 'blob' });
             const link = document.createElement('a');
             link.href = window.URL.createObjectURL(new Blob([response.data]));
             link.setAttribute('download', `DeviceData_${selectedDeviceId}.xlsx`);

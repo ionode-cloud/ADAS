@@ -20,8 +20,8 @@ const AdminPanel = () => {
 
     const fetchUsers = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get('https://adas-fcgb.onrender.com/api/users', { headers: { Authorization: `Bearer ${token}` } });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${apiUrl}/api/users`);
             setUsers(res.data);
         } catch (error) { console.error('Error fetching users', error); }
     };
@@ -29,7 +29,7 @@ const AdminPanel = () => {
     const handleAddOrEditUser = async (e) => {
         e.preventDefault();
         try {
-            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             if (editingUser) {
                 // Validate new password only if admin typed one
                 if (newUser.password && newUser.password.length < 6) {
@@ -37,11 +37,11 @@ const AdminPanel = () => {
                 }
                 const payload = { email: newUser.email, role: newUser.role };
                 if (newUser.password) payload.password = newUser.password;
-                await axios.put(`https://adas-fcgb.onrender.com/api/users/${editingUser._id}`, payload, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.put(`${apiUrl}/api/users/${editingUser._id}`, payload);
             } else {
                 if (!newUser.password) return alert('Password is required for new users.');
                 if (newUser.password.length < 6) return alert('Password must be at least 6 characters.');
-                await axios.post('https://adas-fcgb.onrender.com/api/users', newUser, { headers: { Authorization: `Bearer ${token}` } });
+                await axios.post(`${apiUrl}/api/users`, newUser);
             }
             setNewUser({ email: '', password: '', role: 'user' });
             setEditingUser(null);
@@ -55,8 +55,8 @@ const AdminPanel = () => {
     const handleDeleteUser = async (id) => {
         if (!window.confirm('Delete this user?')) return;
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`https://adas-fcgb.onrender.com/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.delete(`${apiUrl}/api/users/${id}`);
             fetchUsers();
         } catch (error) { alert(error.response?.data?.message || 'Error deleting user'); }
     };

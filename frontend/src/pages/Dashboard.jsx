@@ -8,9 +8,10 @@ import {
     Gauge, Wifi, Clock, Activity, Signal, Search,
     LayoutGrid, ChevronRight, Trash2
 } from 'lucide-react';
-
+import '../index.css';
 import icon from 'leaflet/dist/images/marker-icon.png';
 import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+import battery from '../assets/battery.png';
 
 let DefaultIcon = L.icon({ iconUrl: icon, shadowUrl: iconShadow, iconSize: [25, 41], iconAnchor: [12, 41] });
 L.Marker.prototype.options.icon = DefaultIcon;
@@ -23,7 +24,6 @@ const Dashboard = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [isSelectingDashboard, setIsSelectingDashboard] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const [localIgnition, setLocalIgnition] = useState('ON');
 
     const userString = localStorage.getItem('user');
     const user = userString ? JSON.parse(userString) : {};
@@ -34,10 +34,8 @@ const Dashboard = () => {
         if (!window.confirm("Are you sure you want to delete this dashboard? This action cannot be undone.")) return;
 
         try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`https://adas-fcgb.onrender.com/api/dashboards/${id}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.delete(`${apiUrl}/api/dashboards/${id}`);
             const remaining = dashboards.filter(d => d._id !== id);
             setDashboards(remaining);
             if (remaining.length === 1) {
@@ -56,13 +54,9 @@ const Dashboard = () => {
         const fetchDashboards = async () => {
             try {
                 const token = localStorage.getItem('token');
-                if (!token) {
-                    setIsConnected(false);
-                    return;
-                }
-                const res = await axios.get('https://adas-fcgb.onrender.com/api/dashboards', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                // No longer returning if token is missing - allow public access
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await axios.get(`${apiUrl}/api/dashboards`);
 
                 const all = res.data || [];
                 setDashboards(all);
@@ -91,40 +85,42 @@ const Dashboard = () => {
 
     useEffect(() => {
         if (!selectedDashboard) return;
-        const now = Date.now();
-        const fakeHistory = Array.from({ length: 20 }).map((_, i) => ({
-            timestamp: now - (20 - i) * 5000,
-            batterySOC: Math.floor(80 + Math.random() * 20),
-            batteryTemperature: +(25 + Math.random() * 5).toFixed(1),
-            batteryVoltage: +(12 + Math.random() * 2).toFixed(1),
-            speed: Math.floor(30 + Math.random() * 80),
-            signalStrength: Math.floor(70 + Math.random() * 30),
-            ignitionStatus: 'ON',
-            engineRPM: Math.floor(1200 + Math.random() * 2000),
-            gpsLatitude: 20.2961 + (Math.random() - 0.5) * 0.01,
-            gpsLongitude: 85.8245 + (Math.random() - 0.5) * 0.01,
-            deviceId: selectedDashboard.deviceId
-        }));
-        setDeviceData(fakeHistory);
-        setLatestData(fakeHistory[fakeHistory.length - 1]);
 
-        const interval = setInterval(() => {
-            const newPoint = {
-                timestamp: Date.now(),
-                batterySOC: Math.floor(80 + Math.random() * 20),
-                batteryTemperature: +(25 + Math.random() * 5).toFixed(1),
-                batteryVoltage: +(12 + Math.random() * 2).toFixed(1),
-                speed: Math.floor(30 + Math.random() * 80),
-                signalStrength: Math.floor(70 + Math.random() * 30),
-                ignitionStatus: 'ON',
-                engineRPM: Math.floor(1200 + Math.random() * 2000),
-                gpsLatitude: 20.2961 + (Math.random() - 0.5) * 0.01,
-                gpsLongitude: 85.8245 + (Math.random() - 0.5) * 0.01,
-                deviceId: selectedDashboard.deviceId
-            };
-            setDeviceData(prev => [...prev, newPoint].slice(-50));
-            setLatestData(newPoint);
-        }, 3000);
+        const fetchData = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                // Allow public access to telemetry data
+
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const [latestRes, historyRes] = await Promise.all([
+                    axios.get(`${apiUrl}/api/vehicle/latest?deviceId=${selectedDashboard.deviceId}`),
+                    axios.get(`${apiUrl}/api/vehicle/history?deviceId=${selectedDashboard.deviceId}&limit=50`)
+                ]);
+
+                if (latestRes.data && latestRes.data.deviceId) {
+                    setLatestData(latestRes.data);
+                    setIsConnected(true);
+                } else {
+                    setLatestData(null);
+                    // Use last history point as fallback latest if available
+                    if (historyRes.data && historyRes.data.length > 0) {
+                        setLatestData(historyRes.data[0]);
+                    }
+                }
+
+                if (historyRes.data) {
+                    // History comes in DESC order (latest first) from API, charts usually expect ASC
+                    setDeviceData([...historyRes.data].reverse());
+                }
+            } catch (error) {
+                console.error("Error fetching vehicle data:", error);
+                // Don't set isConnected to false immediately if just a failed poll
+            }
+        };
+
+        fetchData(); // Initial fetch
+        const interval = setInterval(fetchData, 3000); // Poll every 3 seconds
+
         return () => clearInterval(interval);
     }, [selectedDashboard]);
 
@@ -152,31 +148,48 @@ const Dashboard = () => {
                             <span className="text-sm font-bold text-slate-700 uppercase tracking-widest">Ignition</span>
                         </div>
                         <button
-                            onClick={() => setLocalIgnition(prev => prev === 'ON' ? 'OFF' : 'ON')}
-                            className="w-full py-4 rounded-xl font-black text-lg text-white transition-all transform active:scale-95 shadow-md hover:shadow-lg"
-                            style={{ background: localIgnition === 'ON' ? '#059669' : '#DC2626' }}
+                            disabled
+                            className="w-full py-4 rounded-xl font-black text-lg text-white transition-all transform shadow-md opacity-90 cursor-default"
+                            style={{ background: latestData.ignitionStatus === 'ON' ? '#059669' : '#DC2626' }}
                         >
-                            {localIgnition}
+                            {latestData.ignitionStatus || 'OFF'}
                         </button>
-                        <span className="text-xs text-slate-400 font-medium">Click to toggle</span>
+                        <span className="text-xs text-slate-400 font-medium">Device Status</span>
                     </div>
 
                     {/* Battery SOC Side */}
-                    <div className="flex flex-col justify-center items-center gap-3 p-5 rounded-2xl bg-slate-50 h-full border border-slate-100">
-                        <div className="flex items-center gap-2 mb-1">
-                            <Battery size={22} className="text-slate-600" />
-                            <span className="text-sm font-bold text-slate-700 uppercase tracking-widest">Battery SOC</span>
-                        </div>
-                        <div className="text-5xl font-black tracking-tight" style={{ color: batteryColor }}>
-                            {latestData.batterySOC}%
+                    <div className="flex items-center justify-between p-5 rounded-2xl bg-slate-50 h-full border border-slate-100">
+
+                        {/* Left Side (50%) */}
+                        <div className="w-1/2 flex flex-col gap-3">
+                            <div className="flex items-center gap-2">
+                                <Battery size={22} className="text-slate-600" />
+                                <span className="text-sm font-bold text-slate-700 uppercase tracking-widest">
+                                    Battery SOC
+                                </span>
+                            </div>
+
+                            <div className="text-5xl font-black tracking-tight" style={{ color: batteryColor }}>
+                                {latestData.batterySOC}%
+                            </div>
+
+                            {/* Battery Bars */}
+                            <div className="flex gap-1.5 w-full mt-2 h-3">
+                                <div className={`flex-1 rounded-full transition-colors duration-500 ${latestData.batterySOC > 0 ? 'bg-red-500' : 'bg-slate-200'}`} />
+                                <div className={`flex-1 rounded-full transition-colors duration-500 ${latestData.batterySOC > 20 ? 'bg-amber-500' : 'bg-slate-200'}`} />
+                                <div className={`flex-1 rounded-full transition-colors duration-500 ${latestData.batterySOC > 50 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                            </div>
                         </div>
 
-                        {/* 3-way segmented bars */}
-                        <div className="flex gap-1.5 w-full mt-3 h-3">
-                            <div className={`flex-1 rounded-full transition-colors duration-500 ${latestData.batterySOC > 0 ? 'bg-red-500' : 'bg-slate-200'}`} />
-                            <div className={`flex-1 rounded-full transition-colors duration-500 ${latestData.batterySOC > 20 ? 'bg-amber-500' : 'bg-slate-200'}`} />
-                            <div className={`flex-1 rounded-full transition-colors duration-500 ${latestData.batterySOC > 50 ? 'bg-emerald-500' : 'bg-slate-200'}`} />
+                        {/* Right Side Animated Battery */}
+                        <div className="w-1/2 flex justify-center items-center">
+                            <img
+                                src={battery}
+                                alt="battery"
+                                className="w-20 h-20 object-contain battery-float"
+                            />
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -188,7 +201,7 @@ const Dashboard = () => {
             icon: <Thermometer size={22} />,
             iconBg: '#FFF7ED', iconColor: '#EA580C',
             label: 'Battery Temp',
-            value: `${latestData.batteryTemperature}°C`,
+            value: `${latestData.batteryTemperature ?? '--'}°C`,
             valueColor: '#1E293B',
             sub: null,
             trend: latestData.batteryTemperature < 35 ? 'Normal Range' : 'High Temp',
@@ -198,7 +211,7 @@ const Dashboard = () => {
             icon: <Zap size={22} />,
             iconBg: '#FFFBEB', iconColor: '#D97706',
             label: 'Battery Voltage',
-            value: `${latestData.batteryVoltage}V`,
+            value: `${latestData.batteryVoltage ?? '--'}V`,
             valueColor: '#1E293B',
             sub: null,
             trend: 'System Stable',
@@ -208,17 +221,17 @@ const Dashboard = () => {
             icon: <Gauge size={22} />,
             iconBg: '#F0F9FF', iconColor: '#0284C7',
             label: 'Vehicle Speed',
-            value: `${latestData.speed} km/h`,
+            value: `${latestData.speed ?? 0} km/h`,
             valueColor: '#1E293B',
-            sub: { pct: Math.min(latestData.speed / 120 * 100, 100), color: latestData.speed > 100 ? '#EF4444' : '#0284C7' },
-            trend: latestData.speed > 100 ? 'Over Speed' : 'Speed OK',
-            trendColor: latestData.speed > 100 ? '#DC2626' : '#0284C7',
+            sub: { pct: Math.min((latestData.speed ?? 0) / 120 * 100, 100), color: (latestData.speed ?? 0) > 100 ? '#EF4444' : '#0284C7' },
+            trend: (latestData.speed ?? 0) > 100 ? 'Over Speed' : 'Speed OK',
+            trendColor: (latestData.speed ?? 0) > 100 ? '#DC2626' : '#0284C7',
         },
         {
             icon: <Activity size={22} />,
             iconBg: '#FDF4FF', iconColor: '#9333EA',
             label: 'Engine RPM',
-            value: `${latestData.engineRPM.toLocaleString()} rpm`,
+            value: `${(latestData.engineRPM ?? 0).toLocaleString()} rpm`,
             valueColor: '#1E293B',
             sub: null,
             trend: 'Normal Idle',

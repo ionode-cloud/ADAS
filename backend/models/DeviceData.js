@@ -25,6 +25,14 @@ const deviceDataSchema = new mongoose.Schema({
     gpsLongitude: {
         type: Number,
     },
+    speed: {
+        type: Number,
+        default: 0,
+    },
+    engineRPM: {
+        type: Number,
+        default: 0,
+    },
     flRadar: {
         type: Number,
     },

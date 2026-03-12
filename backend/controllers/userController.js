@@ -5,6 +5,9 @@ const bcrypt = require('bcrypt');
 // Get current user
 exports.getMe = async (req, res) => {
     try {
+        if (!req.user) {
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
         const user = await User.findById(req.user._id).select('-password -otpCode -otpExpiry');
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -113,8 +116,8 @@ exports.deleteUser = async (req, res) => {
     try {
         const { id } = req.params;
         
-        // Prevent admin from deleting themselves
-        if (req.user._id.toString() === id.toString()) {
+        // Only prevent admin from deleting themselves if req.user is populated (e.g. via token)
+        if (req.user && req.user._id.toString() === id.toString()) {
              return res.status(400).json({ message: 'You cannot delete your own account.' });
         }
 

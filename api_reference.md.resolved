@@ -1,4 +1,4 @@
-# ADAS Dashboard — API Reference & Dummy Data Guide
+# ADAS Dashboard — API Reference & Guide
 
 ## Base URL
 ```
@@ -7,251 +7,99 @@ http://localhost:5000
 
 ---
 
-## 🔐 Authentication
-
-### Register a New User
-```http
-POST /api/auth/register
-Content-Type: application/json
-
-{
-  "email": "admin@example.com",
-  "password": "secret123",
-  "role": "user"
-}
-```
-→ Sends OTP to email. Then verify below.
-
-### Verify OTP
-```http
-POST /api/auth/verify-otp
-Content-Type: application/json
-
-{
-  "email": "admin@example.com",
-  "otp": "629709"
-}
-```
-
-### Login
-```http
-POST /api/auth/login
-Content-Type: application/json
-
-{
-  "email": "admin@example.com",
-  "password": "secret123"
-}
-```
-→ Returns `{ token, user }`. Use `token` in `Authorization: Bearer <token>` header for all protected routes.
-
----
-
 ## 📡 Device Management
 
-> All device routes require `Authorization: Bearer <token>` header.
-
 ### Add a Device
-```http
-POST /api/devices
-Authorization: Bearer <token>
-Content-Type: application/json
-
+`POST /api/devices`
+```json
 {
   "deviceName": "Fleet Truck #01",
   "deviceId": "DEVICE_001",
-  "particleId": "p1a2b3c4d5e6f001"
+  "location": "New York, NY"
 }
 ```
 
 ### Get All Devices
-```http
-GET /api/devices
-Authorization: Bearer <token>
+`GET /api/devices`
+
+### Update Device Status
+`POST /api/device/status`
+```json
+{
+  "deviceId": "DEVICE_001",
+  "status": "Online"
+}
 ```
 
 ### Delete a Device
-```http
-DELETE /api/devices/:id
-Authorization: Bearer <token>
-```
+`DELETE /api/devices/:id`
 
 ---
 
-## 📊 Telemetry Data (ESP32 → Server)
+## 📊 Vehicle Telemetry (Hardware → Server)
 
-> **No Authentication required** — ESP32 sends directly.
-
-### Send Sensor Data
-```http
-POST /api/device-data
-Content-Type: application/json
-
+### Send Vehicle Data
+`POST /api/vehicle/data`
+```json
 {
-  "deviceId":    "DEVICE_001",
-  "ignition":    "ON",
-  "batteryTemp": 32.5,
-  "batterySOC":  78.3,
-  "batteryVoltage": 52.1,
-  "latitude":    18.5204,
-  "longitude":   73.8567,
-  "flRadar":     120,
-  "frRadar":     145,
-  "rlRadar":     80,
-  "rrRadar":     95,
-  "brakeStatus": "APPLIED",
-  "lux":         450,
-  "headlightStatus": "ON"
-}
-```
-✅ **Field Reference:**
-| Field | Type | Example | Description |
-|---|---|---|---|
-| `deviceId` | string | `"DEVICE_001"` | Must match a registered device |
-| `ignition` | string | `"ON"` / `"OFF"` | Engine ignition status |
-| `batteryTemp` | number | `32.5` | Battery temperature in °C |
-| `batterySOC` | number | `78.3` | State of Charge in % |
-| `batteryVoltage` | number | `52.1` | Voltage in V |
-| `latitude` | number | `18.5204` | GPS latitude |
-| `longitude` | number | `73.8567` | GPS longitude |
-| `flRadar` | number | `120` | Front Left Radar proximity |
-| `frRadar` | number | `145` | Front Right Radar proximity |
-| `rlRadar` | number | `80` | Rear Left Radar proximity |
-| `rrRadar` | number | `95` | Rear Right Radar proximity |
-| `brakeStatus` | string | `"APPLIED"` / `"RELEASED"` | Brake pedal status |
-| `lux` | number | `450` | Ambient light sensor value |
-| `headlightStatus` | string | `"ON"` / `"OFF"` | Headlight operating status |
-
-### Get Device History
-```http
-GET /api/history/:deviceId
-Authorization: Bearer <token>
-```
-→ Returns last 100 records for the device.
-
-### Download Excel Log
-```http
-GET /api/download?deviceId=DEVICE_001&startDate=2026-03-01&endDate=2026-03-05
-Authorization: Bearer <token>
-```
-→ Returns `.xlsx` file download.
-
----
-
-## 🗺️ Dashboards
-
-### Create Dashboard
-```http
-POST /api/dashboards
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "dashboardName": "Fleet Truck #01 Dashboard",
   "deviceId": "DEVICE_001",
-  "description": "Main monitoring dashboard",
-  "enabledFeatures": [
-    "ignition",
-    "batteryTemperature",
-    "batterySOC",
-    "batteryVoltage",
-    "speed",
-    "engineRPM",
-    "gps"
-  ]
+  "batterySOC": 85,
+  "batteryVoltage": 12.4,
+  "batteryTemperature": 29.5,
+  "ignitionStatus": "ON",
+  "gpsLatitude": 40.7128,
+  "gpsLongitude": -74.0060,
+  "speed": 60,
+  "engineRPM": 2100
 }
 ```
-→ Returns dashboard with auto-generated `particleId`.
 
-### Get My Dashboards
-```http
-GET /api/dashboards
-Authorization: Bearer <token>
+### Get Latest Vehicle Data
+`GET /api/vehicle/latest?deviceId=DEVICE_001`
+
+### Get Vehicle History
+`GET /api/vehicle/history?deviceId=DEVICE_001&limit=50`
+
+---
+
+## 📝 Logs
+
+### Create a Log
+`POST /api/logs`
+```json
+{
+  "deviceId": "DEVICE_001",
+  "message": "System starting up",
+  "level": "INFO"
+}
 ```
 
-### Delete Dashboard
-```http
-DELETE /api/dashboards/:id
-Authorization: Bearer <token>
-```
+### Get All Logs
+`GET /api/logs`
+
+---
+
+## 🧪 Postman Usage
+
+All APIs are now **Public**. No authentication token is required in the headers.
+
+1.  **Method**: Set the request type (GET, POST, etc.).
+2.  **URL**: Use `http://localhost:5000` followed by the endpoint.
+3.  **Body**: For POST/PUT requests, set Body to `raw` and format to `JSON`.
+4.  **Query Params**: For telemetry GET requests, use `?deviceId=DEVICE_001`.
 
 ---
 
 ## 🔧 OTA Firmware Update
 
-### 1. Device Ping (ESP32 → Server)
-```http
-GET /api/ota/device-ping?device=DEVICE_001
-```
-→ ESP32 pings this endpoint to state that it is online.
+### Check Device Status
+`GET /api/ota/check-device?device=DEVICE_001`
 
-### 2. Check Device Status (Web Admin)
-```http
-GET /api/ota/check-device?device=DEVICE_001
-Authorization: Bearer <token>
-```
-→ Returns `{ "online": true/false }` if the device pinged within the last 10 seconds.
-
-### 3. Upload Firmware .bin (Web Admin)
-```http
-POST /api/ota/upload/:deviceId
-Authorization: Bearer <token>
-Content-Type: multipart/form-data
-
-firmware: <.bin file>
-```
-→ Uploads `.bin` file and marks an OTA update as pending.
-
-### 4. Update via GitHub Link (Web Admin)
-```http
-POST /api/ota/update-link/:deviceId
-Authorization: Bearer <token>
-Content-Type: application/json
-
-{
-  "url": "https://raw.githubusercontent.com/.../firmware.bin"
-}
-```
-→ Downloads the `.bin` from the link to the server and marks an OTA update as pending.
-
-### 5. Trigger Update (ESP32 Polls)
-```http
-GET /api/ota/trigger-update?device=DEVICE_001
-```
-→ Returns `{ "update": true, "url": "..." }` containing the firmware URL if an update is pending.
-
----
-
-## 🌱 Seed Dummy Data
-
-Run this once to populate 3 devices + 30 telemetry records each:
-
-```bash
-cd backend
-node seed.js
+### Update via Link
+`POST /api/ota/update-link/:deviceId`
+```json
+{ "url": "https://example.com/firmware.bin" }
 ```
 
-**Seeded Device IDs:**
-| Device Name | Device ID |
-|---|---|
-| Fleet Truck #01 | `DEVICE_001` |
-| Fleet Truck #02 | `DEVICE_002` |
-| Electric Van #01 | `DEVICE_003` |
-
-After seeding, create dashboards for each device ID via the UI or the API above.
-
----
-
-## 🧪 Quick Test with curl
-
-```bash
-# 1. Login and get token
-curl -X POST http://localhost:5000/api/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"admin@example.com","password":"secret123"}'
-
-# 2. Send dummy telemetry (no auth needed)
-curl -X POST http://localhost:5000/api/device-data \
-  -H "Content-Type: application/json" \
-  -d '{"deviceId":"DEVICE_001","ignition":"ON","batteryTemp":31.2,"batterySOC":74.5,"batteryVoltage":51.8,"latitude":18.5204,"longitude":73.8567,"flRadar":120,"frRadar":145,"rlRadar":80,"rrRadar":95,"brakeStatus":"APPLIED","lux":450,"headlightStatus":"ON"}'
-```
+### Trigger Update (Hardware Polls)
+`GET /api/ota/trigger-update?device=DEVICE_001`

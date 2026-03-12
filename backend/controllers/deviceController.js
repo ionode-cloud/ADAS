@@ -28,22 +28,37 @@ exports.getDevices = async (req, res) => {
     try {
         const devices = await Device.find().sort({ createdAt: -1 });
 
-        // Check status based on last seen timestamp (e.g., offline if more than 5 minutes ago)
+        // If status is not set manually, check based on last seen
         const devicesWithStatus = devices.map(device => {
             const now = new Date();
             const lastSeen = new Date(device.lastSeen);
             const diffMs = now - lastSeen;
-            let status = diffMs > 5 * 60 * 1000 ? 'Offline' : 'Online';
-
-            // Force dummy/demo devices to be always Online
-            if (device.deviceId === 'DEVICE_002' || device.deviceId === 'DEV-001') {
-                status = 'Online';
-            }
+            let status = device.status || (diffMs > 5 * 60 * 1000 ? 'Offline' : 'Online');
 
             return { ...device._doc, status };
         });
 
         res.status(200).json(devicesWithStatus);
+    } catch (error) {
+        res.status(500).json({ message: 'Server error', error: error.message });
+    }
+};
+
+// Update device status
+exports.updateDeviceStatus = async (req, res) => {
+    try {
+        const { deviceId, status } = req.body;
+        const device = await Device.findOneAndUpdate(
+            { deviceId },
+            { status, lastSeen: new Date() },
+            { new: true }
+        );
+
+        if (!device) {
+            return res.status(404).json({ message: 'Device not found' });
+        }
+
+        res.status(200).json({ message: 'Status updated', device });
     } catch (error) {
         res.status(500).json({ message: 'Server error', error: error.message });
     }

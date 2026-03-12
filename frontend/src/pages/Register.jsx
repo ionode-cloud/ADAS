@@ -31,7 +31,8 @@ const Register = () => {
         setError('');
         setLoading(true);
         try {
-            await axios.post('https://adas-fcgb.onrender.com/api/auth/register', { email, password, role: 'user' });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${apiUrl}/api/auth/register`, { email, password, role: 'user' });
             setStep(STEPS.OTP);
             setCountdown(60);
         } catch (err) {
@@ -46,7 +47,8 @@ const Register = () => {
         setError('');
         setLoading(true);
         try {
-            await axios.post('https://adas-fcgb.onrender.com/api/auth/send-otp', { email });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${apiUrl}/api/auth/send-otp`, { email });
             setCountdown(60);
             setSuccess('OTP resent successfully!');
             setTimeout(() => setSuccess(''), 3000);
@@ -88,7 +90,8 @@ const Register = () => {
         setError('');
         setLoading(true);
         try {
-            await axios.post('https://adas-fcgb.onrender.com/api/auth/verify-otp', { email, otp: code });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${apiUrl}/api/auth/verify-otp`, { email, otp: code });
             setStep(STEPS.DONE);
         } catch (err) {
             setError(err.response?.data?.message || 'Invalid OTP. Please try again.');

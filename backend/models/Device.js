@@ -25,6 +25,11 @@ const deviceSchema = new mongoose.Schema({
     otaFirmwareUrl: {
         type: String,
         default: "",
+    },
+    status: {
+        type: String,
+        enum: ['Online', 'Offline'],
+        default: 'Offline',
     }
 }, { timestamps: true });
 

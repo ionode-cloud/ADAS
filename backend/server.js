@@ -11,6 +11,8 @@ const dashboardRoutes = require('./routes/dashboardRoutes');
 const dataRoutes = require('./routes/dataRoutes');
 const otaRoutes = require('./routes/otaRoutes');
 const userRoutes = require('./routes/userRoutes');
+const vehicleRoutes = require('./routes/vehicleRoutes');
+const logRoutes = require('./routes/logRoutes');
 
 
 const app = express();
@@ -45,6 +47,9 @@ app.use('/api/dashboards', dashboardRoutes);
 app.use('/api', dataRoutes); // contains /device-data, /history, /download
 app.use('/api/ota', otaRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/vehicle', vehicleRoutes);
+app.use('/api/device', deviceRoutes); // Adding /api/device for device status updates
+app.use('/api/logs', logRoutes);
 
 // Socket.io connection handling
 io.on('connection', (socket) => {

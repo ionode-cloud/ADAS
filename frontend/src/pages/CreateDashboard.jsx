@@ -35,19 +35,15 @@ const CreateDashboard = () => {
         const fetchDevices = async () => {
             try {
                 const token = localStorage.getItem('token');
-                if (!token) return;
-                const res = await axios.get('https://adas-fcgb.onrender.com/api/devices', {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
+                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const res = await axios.get(`${apiUrl}/api/devices`);
                 setDevices(res.data);
             } catch (error) {
                 console.error("Error fetching devices", error);
             }
         };
 
-        if (isAuthenticated) {
-            fetchDevices();
-        }
+        fetchDevices();
     }, [isAuthenticated]);
 
     const toggleFeature = (key) => {
@@ -74,15 +70,10 @@ const CreateDashboard = () => {
         setCreatedParticleId('');
 
         try {
-            const token = localStorage.getItem('token');
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
             const res = await axios.post(
-                'https://adas-fcgb.onrender.com/api/dashboards',
-                { dashboardName, deviceId, email, password, enabledFeatures, description },
-                {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                }
+                `${apiUrl}/api/dashboards`,
+                { dashboardName, deviceId, email, password, enabledFeatures, description }
             );
 
             setCreatedParticleId(res.data.dashboard.particleId);

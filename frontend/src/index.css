@@ -1445,3 +1445,19 @@
   transform: none !important;
   box-shadow: none !important;
 }
+
+.battery-float{
+  animation: batteryMove 2s ease-in-out infinite;
+}
+
+@keyframes batteryMove{
+  0%{
+    transform: translateY(0px);
+  }
+  50%{
+    transform: translateY(-12px);
+  }
+  100%{
+    transform: translateY(0px);
+  }
+}

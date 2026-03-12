@@ -20,16 +20,14 @@ const DeviceList = () => {
     const [formError, setFormError] = useState('');
     const [formSuccess, setFormSuccess] = useState('');
 
-    const token = localStorage.getItem('token');
-    const headers = { Authorization: `Bearer ${token}` };
-
     const userString = localStorage.getItem('user');
     const user = userString ? JSON.parse(userString) : {};
     const isAdmin = user.role === 'admin';
 
     const fetchDevices = async () => {
         try {
-            const res = await axios.get('https://adas-fcgb.onrender.com/api/devices', { headers });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${apiUrl}/api/devices`);
             setDevices(res.data);
         } catch (err) {
             console.error('Error fetching devices', err);
@@ -46,9 +44,9 @@ const DeviceList = () => {
         setFormSuccess('');
         setFormLoading(true);
         try {
-            await axios.post('https://adas-fcgb.onrender.com/api/devices',
-                { deviceName, deviceId, location },
-                { headers }
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.post(`${apiUrl}/api/devices`,
+                { deviceName, deviceId, location }
             );
             setFormSuccess(`Device "${deviceName}" added successfully!`);
             setDeviceName('');
@@ -64,9 +62,9 @@ const DeviceList = () => {
     };
 
     const handleDelete = async (id, name) => {
-        if (!window.confirm(`Remove device "${name}"?`)) return;
         try {
-            await axios.delete(`https://adas-fcgb.onrender.com/api/devices/${id}`, { headers });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            await axios.delete(`${apiUrl}/api/devices/${id}`);
             setDevices(prev => prev.filter(d => d._id !== id));
         } catch (err) {
             alert('Failed to delete device.');

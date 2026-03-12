@@ -19,8 +19,8 @@ const DevicesAndInfrastructure = () => {
 
     const fetchDevices = async () => {
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get('https://adas-fcgb.onrender.com/api/devices', { headers: { Authorization: `Bearer ${token}` } });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${apiUrl}/api/devices`);
             setDevices(res.data);
         } catch (error) { console.error('Error fetching devices', error); }
     };
@@ -30,10 +30,8 @@ const DevicesAndInfrastructure = () => {
         setIsLoading(prev => ({ ...prev, check: true }));
         setUploadStatus('Checking device status...');
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.get(`https://adas-fcgb.onrender.com/api/ota/check-device?device=${selectedDevice}`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.get(`${apiUrl}/api/ota/check-device?device=${selectedDevice}`);
             setDeviceStatus(res.data.online);
             setUploadStatus(res.data.online ? '✓ Device is ONLINE' : '⚠ Device is OFFLINE');
         } catch (error) {
@@ -50,10 +48,8 @@ const DevicesAndInfrastructure = () => {
         setIsLoading(prev => ({ ...prev, link: true }));
         setUploadStatus('Updating firmware from link...');
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.post(`https://adas-fcgb.onrender.com/api/ota/update-link/${selectedDevice}`, { url: gitLink }, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.post(`${apiUrl}/api/ota/update-link/${selectedDevice}`, { url: gitLink });
             setUploadStatus(`✓ ${res.data}`);
             setGitLink('');
         } catch (error) {
@@ -74,9 +70,9 @@ const DevicesAndInfrastructure = () => {
         setUploadStatus('Uploading firmware...');
 
         try {
-            const token = localStorage.getItem('token');
-            const res = await axios.post(`https://adas-fcgb.onrender.com/api/ota/upload/${selectedDevice}`, formData, {
-                headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'multipart/form-data' }
+            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const res = await axios.post(`${apiUrl}/api/ota/upload/${selectedDevice}`, formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
             setUploadStatus(`✓ ${res.data}`);
             setFile(null);
