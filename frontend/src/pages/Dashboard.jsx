@@ -34,7 +34,7 @@ const Dashboard = () => {
         if (!window.confirm("Are you sure you want to delete this dashboard? This action cannot be undone.")) return;
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             await axios.delete(`${apiUrl}/api/dashboards/${id}`);
             const remaining = dashboards.filter(d => d._id !== id);
             setDashboards(remaining);
@@ -55,7 +55,7 @@ const Dashboard = () => {
             try {
                 const token = localStorage.getItem('token');
                 // No longer returning if token is missing - allow public access
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
                 const res = await axios.get(`${apiUrl}/api/dashboards`);
 
                 const all = res.data || [];
@@ -91,7 +91,7 @@ const Dashboard = () => {
                 const token = localStorage.getItem('token');
                 // Allow public access to telemetry data
 
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
                 const [latestRes, historyRes] = await Promise.all([
                     axios.get(`${apiUrl}/api/vehicle/latest?deviceId=${selectedDashboard.deviceId}`),
                     axios.get(`${apiUrl}/api/vehicle/history?deviceId=${selectedDashboard.deviceId}&limit=50`)

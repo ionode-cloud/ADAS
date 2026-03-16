@@ -26,7 +26,7 @@ const DeviceList = () => {
 
     const fetchDevices = async () => {
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.get(`${apiUrl}/api/devices`);
             setDevices(res.data);
         } catch (err) {
@@ -44,7 +44,7 @@ const DeviceList = () => {
         setFormSuccess('');
         setFormLoading(true);
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             await axios.post(`${apiUrl}/api/devices`,
                 { deviceName, deviceId, location }
             );
@@ -63,7 +63,7 @@ const DeviceList = () => {
 
     const handleDelete = async (id, name) => {
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             await axios.delete(`${apiUrl}/api/devices/${id}`);
             setDevices(prev => prev.filter(d => d._id !== id));
         } catch (err) {

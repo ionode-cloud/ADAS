@@ -17,7 +17,7 @@ const Login = ({ setAuth }) => {
         setError('');
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.post(`${apiUrl}/api/auth/login`, { email, password });
             localStorage.setItem('token', res.data.token);
             localStorage.setItem('user', JSON.stringify(res.data.user));

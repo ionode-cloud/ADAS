@@ -20,7 +20,7 @@ const AdminPanel = () => {
 
     const fetchUsers = async () => {
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.get(`${apiUrl}/api/users`);
             setUsers(res.data);
         } catch (error) { console.error('Error fetching users', error); }
@@ -29,7 +29,7 @@ const AdminPanel = () => {
     const handleAddOrEditUser = async (e) => {
         e.preventDefault();
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             if (editingUser) {
                 // Validate new password only if admin typed one
                 if (newUser.password && newUser.password.length < 6) {
@@ -55,7 +55,7 @@ const AdminPanel = () => {
     const handleDeleteUser = async (id) => {
         if (!window.confirm('Delete this user?')) return;
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             await axios.delete(`${apiUrl}/api/users/${id}`);
             fetchUsers();
         } catch (error) { alert(error.response?.data?.message || 'Error deleting user'); }

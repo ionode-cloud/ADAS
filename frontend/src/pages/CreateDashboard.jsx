@@ -35,7 +35,7 @@ const CreateDashboard = () => {
         const fetchDevices = async () => {
             try {
                 const token = localStorage.getItem('token');
-                const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+                const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
                 const res = await axios.get(`${apiUrl}/api/devices`);
                 setDevices(res.data);
             } catch (error) {
@@ -70,7 +70,7 @@ const CreateDashboard = () => {
         setCreatedParticleId('');
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.post(
                 `${apiUrl}/api/dashboards`,
                 { dashboardName, deviceId, email, password, enabledFeatures, description }

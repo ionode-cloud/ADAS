@@ -19,7 +19,7 @@ const DevicesAndInfrastructure = () => {
 
     const fetchDevices = async () => {
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.get(`${apiUrl}/api/devices`);
             setDevices(res.data);
         } catch (error) { console.error('Error fetching devices', error); }
@@ -30,7 +30,7 @@ const DevicesAndInfrastructure = () => {
         setIsLoading(prev => ({ ...prev, check: true }));
         setUploadStatus('Checking device status...');
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.get(`${apiUrl}/api/ota/check-device?device=${selectedDevice}`);
             setDeviceStatus(res.data.online);
             setUploadStatus(res.data.online ? '✓ Device is ONLINE' : '⚠ Device is OFFLINE');
@@ -48,7 +48,7 @@ const DevicesAndInfrastructure = () => {
         setIsLoading(prev => ({ ...prev, link: true }));
         setUploadStatus('Updating firmware from link...');
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.post(`${apiUrl}/api/ota/update-link/${selectedDevice}`, { url: gitLink });
             setUploadStatus(`✓ ${res.data}`);
             setGitLink('');
@@ -70,7 +70,7 @@ const DevicesAndInfrastructure = () => {
         setUploadStatus('Uploading firmware...');
 
         try {
-            const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
             const res = await axios.post(`${apiUrl}/api/ota/upload/${selectedDevice}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' }
             });
