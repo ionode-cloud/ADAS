@@ -12,9 +12,15 @@ const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
 exports.register = async (req, res) => {
     try {
         const { email, password, role } = req.body;
+        console.log('Register attempt:', { email, role });
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required.' });
+        }
 
         const existingUser = await User.findOne({ email });
         if (existingUser && existingUser.isVerified) {
+            console.log('Register failed: User already exists and verified:', email);
             return res.status(400).json({ message: 'User already exists with this email.' });
         }
 
@@ -132,9 +138,17 @@ exports.verifyOtp = async (req, res) => {
 exports.login = async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('Login attempt:', { email });
+
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required.' });
+        }
 
         const user = await User.findOne({ email });
-        if (!user) return res.status(400).json({ message: 'Invalid credentials.' });
+        if (!user) {
+            console.log('Login failed: User not found:', email);
+            return res.status(400).json({ message: 'Invalid credentials.' });
+        }
 
         if (!user.isVerified) {
             return res.status(403).json({ message: 'Email not yet verified. Please complete OTP verification.' });
@@ -149,7 +163,10 @@ exports.login = async (req, res) => {
             isMatch = password === user.password;
         }
 
-        if (!isMatch) return res.status(400).json({ message: 'Invalid credentials.' });
+        if (!isMatch) {
+            console.log('Login failed: Password mismatch for user:', email);
+            return res.status(400).json({ message: 'Invalid credentials.' });
+        }
 
         const token = jwt.sign(
             { userId: user._id, role: user.role },

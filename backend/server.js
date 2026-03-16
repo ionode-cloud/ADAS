@@ -56,6 +56,14 @@ app.use('/api/vehicle', vehicleRoutes);
 app.use('/api/device', deviceRoutes); // Adding /api/device for device status updates
 app.use('/api/logs', logRoutes);
 
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'UP',
+        time: new Date(),
+        dbStatus: mongoose.connection.readyState === 1 ? 'Connected' : 'Disconnected'
+    });
+});
+
 // Socket.io connection handling
 io.on('connection', (socket) => {
     console.log('New client connected', socket.id);
