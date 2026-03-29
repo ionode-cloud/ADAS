@@ -50,6 +50,30 @@ const Dashboard = () => {
             alert(error.response?.data?.message || "Failed to delete dashboard");
         }
     };
+
+    const handleToggleIgnition = async () => {
+        if (!selectedDashboard || !latestData) return;
+        
+        const currentStatus = latestData.ignitionStatus || 'OFF';
+        const newStatus = currentStatus === 'ON' ? 'OFF' : 'ON';
+        
+        // Optimistic UI update
+        const originalData = { ...latestData };
+        setLatestData({ ...latestData, ignitionStatus: newStatus });
+        
+        try {
+            const apiUrl = import.meta.env.VITE_API_URL || 'https://adas.api.ionode.cloud';
+            await axios.post(`${apiUrl}/api/vehicle/ignition`, {
+                deviceId: selectedDashboard.deviceId,
+                status: newStatus
+            });
+        } catch (error) {
+            console.error("Error toggling ignition:", error);
+            // Revert on API failure
+            setLatestData(originalData);
+            alert(error.response?.data?.message || "Failed to toggle ignition");
+        }
+    };
     useEffect(() => {
         const fetchDashboards = async () => {
             try {
@@ -148,8 +172,8 @@ const Dashboard = () => {
                             <span className="text-sm font-bold text-slate-700 uppercase tracking-widest">Ignition</span>
                         </div>
                         <button
-                            disabled
-                            className="w-full py-4 rounded-xl font-black text-lg text-white transition-all transform shadow-md opacity-90 cursor-default"
+                            onClick={handleToggleIgnition}
+                            className="w-full py-4 rounded-xl font-black text-lg text-white transition-all transform shadow-md hover:scale-105 active:scale-95 cursor-pointer"
                             style={{ background: latestData.ignitionStatus === 'ON' ? '#059669' : '#DC2626' }}
                         >
                             {latestData.ignitionStatus || 'OFF'}
@@ -204,8 +228,18 @@ const Dashboard = () => {
             value: `${latestData.batteryTemperature ?? '--'}°C`,
             valueColor: '#1E293B',
             sub: null,
-            trend: latestData.batteryTemperature < 35 ? 'Normal Range' : 'High Temp',
-            trendColor: latestData.batteryTemperature < 35 ? '#059669' : '#DC2626',
+            trend: latestData.batteryTemperature == null ? '--' : latestData.batteryTemperature >= 50 ? 'Critical' : latestData.batteryTemperature >= 35 ? 'High Temp' : 'Normal Range',
+            trendColor: latestData.batteryTemperature == null ? '#64748B' : latestData.batteryTemperature >= 50 ? '#DC2626' : latestData.batteryTemperature >= 35 ? '#D97706' : '#059669',
+        },
+        {
+            icon: <Thermometer size={22} />,
+            iconBg: '#FFF1F2', iconColor: '#E11D48',
+            label: 'Motor Temp',
+            value: `${latestData.motorTemperature ?? '--'}°C`,
+            valueColor: '#1E293B',
+            sub: latestData.motorTemperature != null ? { pct: Math.min((latestData.motorTemperature / 120) * 100, 100), color: latestData.motorTemperature >= 100 ? '#EF4444' : latestData.motorTemperature >= 70 ? '#F59E0B' : '#10B981' } : null,
+            trend: latestData.motorTemperature == null ? '--' : latestData.motorTemperature >= 100 ? 'Critical Temp' : latestData.motorTemperature >= 70 ? 'Warning' : 'Normal Range',
+            trendColor: latestData.motorTemperature == null ? '#64748B' : latestData.motorTemperature >= 100 ? '#DC2626' : latestData.motorTemperature >= 70 ? '#D97706' : '#059669',
         },
         {
             icon: <Zap size={22} />,
@@ -216,16 +250,6 @@ const Dashboard = () => {
             sub: null,
             trend: 'System Stable',
             trendColor: '#059669',
-        },
-        {
-            icon: <Gauge size={22} />,
-            iconBg: '#F0F9FF', iconColor: '#0284C7',
-            label: 'Vehicle Speed',
-            value: `${latestData.speed ?? 0} km/h`,
-            valueColor: '#1E293B',
-            sub: { pct: Math.min((latestData.speed ?? 0) / 120 * 100, 100), color: (latestData.speed ?? 0) > 100 ? '#EF4444' : '#0284C7' },
-            trend: (latestData.speed ?? 0) > 100 ? 'Over Speed' : 'Speed OK',
-            trendColor: (latestData.speed ?? 0) > 100 ? '#DC2626' : '#0284C7',
         },
         {
             icon: <Activity size={22} />,
@@ -408,9 +432,14 @@ const Dashboard = () => {
                                         </div>
                                         <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse flex-shrink-0" />
                                     </div>
-                                    <p className="text-3xl font-extrabold tracking-tight leading-none" style={{ color: k.valueColor }}>
-                                        {k.value}
-                                    </p>
+                                    <div className="flex items-center justify-between gap-4">
+                                        <p className="text-3xl font-extrabold tracking-tight leading-none" style={{ color: k.valueColor }}>
+                                            {k.value}
+                                        </p>
+                                        {k.img && (
+                                            <img src={k.img} alt={k.label} className="w-14 h-14 object-contain battery-float flex-shrink-0" />
+                                        )}
+                                    </div>
                                     {k.sub && (
                                         <div className="w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
                                             <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(Math.max(k.sub.pct, 0), 100)}%`, background: k.sub.color }} />

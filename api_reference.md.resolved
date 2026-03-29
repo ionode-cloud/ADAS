@@ -1,13 +1,5 @@
 # ADAS Dashboard — API Reference & Guide
 
-## Base URL
-- Local: `http://localhost:5000`
-- Production: `https://adas-fcgb.onrender.com`
-
----
-
-## 📡 Device Management
-
 ### Add a Device
 `POST /api/devices`
 ```json
@@ -45,6 +37,7 @@
   "batterySOC": 85,
   "batteryVoltage": 12.4,
   "batteryTemperature": 29.5,
+  "motorTemperature": 65.0,
   "ignitionStatus": "ON",
   "gpsLatitude": 40.7128,
   "gpsLongitude": -74.0060,
@@ -58,6 +51,15 @@
 
 ### Get Vehicle History
 `GET /api/vehicle/history?deviceId=DEVICE_001&limit=50`
+
+### Toggle/Update Ignition Status
+`POST /api/vehicle/ignition`
+```json
+{
+  "deviceId": "DEVICE_001",
+  "status": "ON" // or "OFF"
+}
+```
 
 ---
 

@@ -6,5 +6,6 @@ const { protect } = require('../middleware/authMiddleware');
 router.post('/data', vehicleController.storeVehicleData);
 router.get('/latest', vehicleController.getLatestVehicleData);
 router.get('/history', vehicleController.getVehicleHistory);
+router.post('/ignition', vehicleController.updateIgnitionStatus);
 
 module.exports = router;

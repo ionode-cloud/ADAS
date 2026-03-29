@@ -13,6 +13,9 @@ const deviceDataSchema = new mongoose.Schema({
     batteryTemperature: {
         type: Number,
     },
+    motorTemperature: {
+        type: Number,
+    },
     batterySOC: {
         type: Number,
     },
