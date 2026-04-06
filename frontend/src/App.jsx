@@ -45,8 +45,19 @@ function App() {
           localStorage.setItem('user', JSON.stringify(res.data));
           setIsAuthenticated(true);
         } catch (error) {
-          // Interceptor will handle the 401 error and log out
-          console.error("Token verification failed", error);
+          // Only log out on a true 401 Unauthorized (invalid/expired token).
+          // For network errors, timeouts, or server issues, keep the user
+          // authenticated using the existing token — do NOT logout on refresh.
+          if (error.response && error.response.status === 401) {
+            console.warn("Token expired or invalid — logging out.");
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            setIsAuthenticated(false);
+          } else {
+            // Network/server error: trust the stored token and stay logged in
+            console.warn("Could not verify token with server (network/server error). Staying logged in.", error.message);
+            setIsAuthenticated(true);
+          }
         }
       }
       setIsLoading(false);
